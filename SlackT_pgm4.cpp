@@ -1,7 +1,9 @@
 #include <iostream>
+#include <iomanip>
 #include <fstream>
 #include <cmath>
 #include <cassert>
+#include <string>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -10,9 +12,7 @@
 #include <unistd.h>
 #endif
 
-// imo this is much better practice than "using namespace std"
-// namespace contamination is not a very cool issue!
-using std::cout, std::cin, std::ifstream, std::abs;
+using std::cout, std::cin, std::ifstream, std::abs, std::setw, std::left, std::right, std::setfill, std::string;
 
 #ifdef _WIN32
 // using winapi to fetch console info
@@ -49,19 +49,32 @@ int getConsoleWidth()
 }
 #endif
 
+#ifdef _DEBUG
+const int MAX_SELECTION = 5;
+#else
+const int MAX_SELECTION = 4;
+#endif
+
+// FIXME: if console size is changed during runtime, output will not scale
+const int CONSOLE_WIDTH = getConsoleWidth();
+const int MAX_RANGE = 115;
 
 int main()
 {
     int fileSelection = 0;
 
     // loop until valid option is input
-    while (fileSelection < 1 || fileSelection > 4)
+    while (fileSelection < 1 || fileSelection > MAX_SELECTION)
     {
         cout << "Select file to process:\n";
         cout << "1. mixed.txt\n";
         cout << "2. valid.txt\n";
         cout << "3. three.txt\n";
-        cout << "4. missing.txt\n\n";
+        cout << "4. missing.txt\n";
+        #ifdef _DEBUG
+        cout << "5. debug.txt\n";
+        #endif
+        cout << "\n";
 
         cout << "Choice: ";
         cin >> fileSelection;
@@ -94,6 +107,11 @@ int main()
         fileData.open("res/three.txt");
         cout << "three.txt";
     }
+    if(fileSelection == 5)
+    {
+        fileData.open("res/debug.txt");
+        cout << "debug.txt";
+    }
     cout << " file:\n\n";
 
     // if file is unable to be opened, quit program
@@ -104,6 +122,7 @@ int main()
     }
 
     int invalidCount = 0;
+    int idx = 1;
 
     while(!fileData.fail())
     {
@@ -118,6 +137,30 @@ int main()
             nextVal = abs(nextVal);
             invalidCount++;
         }
+
+        if(nextVal > MAX_RANGE) nextVal = MAX_RANGE;
+
+        int barWidth = ((nextVal * (CONSOLE_WIDTH - 4)) / MAX_RANGE) + 1;
+
+        cout << setfill(' ') << setw(2) << right;
+        cout << idx << " |";
+        cout << setw(barWidth) << setfill('X');
+        cout << "\n";
+
+        idx++;
+    }
+
+    for(int i = 0; i < CONSOLE_WIDTH; i++) cout << "-";
+    cout << "\n";
+
+    cout << "    1";
+    int spacing = (10 * (CONSOLE_WIDTH - 5) / MAX_RANGE);
+
+    int digits = 1;
+    for(int i = 10; i < MAX_RANGE; i += 10)
+    {
+        cout << string(spacing - digits, ' ') << i;
+        digits = std::log10(i);
     }
 
     fileData.close();
