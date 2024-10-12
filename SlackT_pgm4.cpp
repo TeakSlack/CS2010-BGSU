@@ -140,6 +140,7 @@ int main()
 
         if(nextVal > MAX_RANGE) nextVal = MAX_RANGE;
 
+        // calculate bar length and print
         int barWidth = ((nextVal * (CONSOLE_WIDTH - 4)) / MAX_RANGE) + 1;
 
         cout << setfill(' ') << setw(2) << right;
@@ -153,15 +154,17 @@ int main()
     for(int i = 0; i < CONSOLE_WIDTH; i++) cout << "-";
     cout << "\n";
 
-    cout << "    1";
-    int spacing = (10 * (CONSOLE_WIDTH - 5) / MAX_RANGE);
-
-    int digits = 1;
+    // print y axis, scaled to console width
+    string yScale = "    1";
+    float stride = 10 * ((float)CONSOLE_WIDTH / MAX_RANGE);
     for(int i = 10; i < MAX_RANGE; i += 10)
     {
-        cout << string(spacing - digits, ' ') << i;
-        digits = std::log10(i);
+        int barWidth = ((i * (CONSOLE_WIDTH - 4)) / MAX_RANGE) + 1;
+        string next = string(barWidth - yScale.size() + 2, ' ') + std::to_string(i);
+        yScale.append(next);
     }
+
+    cout << yScale << "\n";
 
     fileData.close();
     return EXIT_SUCCESS;
