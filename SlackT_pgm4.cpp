@@ -81,17 +81,17 @@ int main()
 
     if (fileSelection == 1) 
     {
-        fileData.open("mixed.txt");
+        fileData.open("res/mixed.txt");
         cout << "mixed.txt";
     }
     if (fileSelection == 2) 
     {
-        fileData.open("valid.txt");
+        fileData.open("res/valid.txt");
         cout << "valid.txt";
     }
     if (fileSelection == 3) 
     {
-        fileData.open("three.txt");
+        fileData.open("res/three.txt");
         cout << "three.txt";
     }
     cout << " file:\n\n";
