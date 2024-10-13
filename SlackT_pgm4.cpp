@@ -33,6 +33,13 @@ int getConsoleWidth()
     return width;
 }
 
+const int RESET = 7;
+
+void setConsoleColor(int color)
+{
+    SetConsoleTextAttribute(hConsole, color);
+}
+
 #elif __unix__
 int getConsoleWidth()
 {
@@ -46,6 +53,15 @@ int getConsoleWidth()
 
     assert(w.ws_col != -1);
     return w.ws_col;
+}
+
+const string BACKGROUND_BLUE = "\033[44m";
+const string BACKGROUND_RED = "\033[41m";
+const string RESET = "\033[0m";
+
+void setConsoleColor(string color)
+{
+    cout << color;
 }
 #endif
 
@@ -92,27 +108,27 @@ int main()
 
     cout << "Bar graph for data contained in ";
 
-    if (fileSelection == 1) 
+    string fileName;
+
+    switch (fileSelection)
     {
-        fileData.open("res/mixed.txt");
-        cout << "mixed.txt";
+        case 1:
+            fileName = "mixed.txt";
+            break;
+        case 2:
+            fileName = "valid.txt";
+            break;
+        case 3:
+            fileName = "three.txt";
+            break;
+        case 5:
+            fileName = "debug.txt";
+            break;
     }
-    if (fileSelection == 2) 
-    {
-        fileData.open("res/valid.txt");
-        cout << "valid.txt";
-    }
-    if (fileSelection == 3) 
-    {
-        fileData.open("res/three.txt");
-        cout << "three.txt";
-    }
-    if(fileSelection == 5)
-    {
-        fileData.open("res/debug.txt");
-        cout << "debug.txt";
-    }
-    cout << " file:\n\n";
+    
+    cout << fileName << " file:\n\n";
+
+    fileData.open("res/" + fileName);
 
     // if file is unable to be opened, quit program
     if(!fileData.is_open())
@@ -123,22 +139,26 @@ int main()
 
     int invalidCount = 0;
     int idx = 1;
+    int nextVal;
+    fileData >> nextVal;
 
-    while(!fileData.fail())
+    // watch for sentinel value or file read error
+    while(nextVal != 9999 && !fileData.fail())
     {
-        int nextVal;
-        fileData >> nextVal;
+        setConsoleColor(RESET);
 
-        // watch for sentinel value
-        if(nextVal == 9999) break;
-        
         if(nextVal < 0)
         {
+            setConsoleColor(BACKGROUND_BLUE);
             nextVal = abs(nextVal);
             invalidCount++;
         }
 
-        if(nextVal > MAX_RANGE) nextVal = MAX_RANGE;
+        if(nextVal > MAX_RANGE)
+        {
+            setConsoleColor(BACKGROUND_RED);
+            nextVal = MAX_RANGE;
+        }
 
         // calculate bar length and print
         int barWidth = ((nextVal * (CONSOLE_WIDTH - 4)) / MAX_RANGE) + 1;
@@ -149,6 +169,7 @@ int main()
         cout << "\n";
 
         idx++;
+        fileData >> nextVal;
     }
 
     for(int i = 0; i < CONSOLE_WIDTH; i++) cout << "-";
@@ -156,7 +177,6 @@ int main()
 
     // print y axis, scaled to console width
     string yScale = "    1";
-    float stride = 10 * ((float)CONSOLE_WIDTH / MAX_RANGE);
     for(int i = 10; i < MAX_RANGE; i += 10)
     {
         int barWidth = ((i * (CONSOLE_WIDTH - 4)) / MAX_RANGE) + 1;
