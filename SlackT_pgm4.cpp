@@ -14,6 +14,15 @@
 
 using std::cout, std::cin, std::ifstream, std::abs, std::setw, std::left, std::right, std::setfill, std::string;
 
+const string BG_BLUE = "\033[44m";
+const string BG_RED = "\033[41m";
+const string RESET = "\033[0m";
+
+void setConsoleColor(string color)
+{
+    cout << color;
+}
+
 #ifdef _WIN32
 // using winapi to fetch console info
 // using hungarian notation to align with winapi
@@ -33,12 +42,12 @@ int getConsoleWidth()
     return width;
 }
 
-const int RESET = 7;
+// const int RESET = 7;
 
-void setConsoleColor(int color)
-{
-    SetConsoleTextAttribute(hConsole, color);
-}
+// void setConsoleColor(int color)
+// {
+//     SetConsoleTextAttribute(hConsole, color);
+// }
 
 #elif __unix__
 int getConsoleWidth()
@@ -53,15 +62,6 @@ int getConsoleWidth()
 
     assert(w.ws_col != -1);
     return w.ws_col;
-}
-
-const string BACKGROUND_BLUE = "\033[44m";
-const string BACKGROUND_RED = "\033[41m";
-const string RESET = "\033[0m";
-
-void setConsoleColor(string color)
-{
-    cout << color;
 }
 #endif
 
@@ -145,18 +145,17 @@ int main()
     // watch for sentinel value or file read error
     while(nextVal != 9999 && !fileData.fail())
     {
-        setConsoleColor(RESET);
 
         if(nextVal < 0)
         {
-            setConsoleColor(BACKGROUND_BLUE);
+            setConsoleColor(BG_BLUE);
             nextVal = abs(nextVal);
             invalidCount++;
         }
 
         if(nextVal > MAX_RANGE)
         {
-            setConsoleColor(BACKGROUND_RED);
+            setConsoleColor(BG_RED);
             nextVal = MAX_RANGE;
         }
 
@@ -166,6 +165,7 @@ int main()
         cout << setfill(' ') << setw(2) << right;
         cout << idx << " |";
         cout << setw(barWidth) << setfill('X');
+        setConsoleColor(RESET);
         cout << "\n";
 
         idx++;
@@ -180,7 +180,7 @@ int main()
     for(int i = 10; i < MAX_RANGE; i += 10)
     {
         int barWidth = ((i * (CONSOLE_WIDTH - 4)) / MAX_RANGE) + 1;
-        string next = string(barWidth - yScale.size() + 2, ' ') + std::to_string(i);
+        string next = string(barWidth - yScale.size() - 1, ' ') + std::to_string(i);
         yScale.append(next);
     }
 
