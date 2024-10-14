@@ -36,6 +36,13 @@
 
 using std::cout, std::cin, std::ifstream, std::abs, std::setw, std::left, std::right, std::setfill, std::string;
 
+#ifdef TEAK_LOCAL
+string path = "res/";
+#else
+string path = "";
+#endif
+
+// using ansi escape codes for cross-platform compatibility
 const string BG_BLUE = "\033[44m";
 const string BG_RED = "\033[41m";
 const string RESET = "\033[0m";
@@ -44,6 +51,24 @@ const string RESET = "\033[0m";
 // using winapi to fetch console info
 // using hungarian notation to align with winapi
 HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+
+// enable ansi color codes on windows
+void setupConsole()
+{
+    DWORD consoleMode;
+    if(!GetConsoleMode(hConsole, &consoleMode))
+    {
+        cout << "ERROR: Cannot get console mode!\n";
+        exit(EXIT_FAILURE);
+    }
+
+    consoleMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+    if(!SetConsoleMode(hConsole, consoleMode))
+    {
+        cout << "ERROR: Could not set console mode!\n";
+        exit(EXIT_FAILURE);
+    }
+}
 
 int getConsoleWidth()
 {
@@ -72,6 +97,11 @@ int getConsoleWidth()
     assert(w.ws_col != -1);
     return w.ws_col;
 }
+
+void setupConsole()
+{
+
+}
 #endif
 
 #ifdef _DEBUG
@@ -82,10 +112,12 @@ const int MAX_SELECTION = 4;
 
 // FIXME: if console size is changed during runtime, output will not scale
 const int CONSOLE_WIDTH = getConsoleWidth();
-const int MAX_RANGE = 115;
+const int MAX_RANGE = 112;
 
 int main()
 {
+    setupConsole();
+
     int fileSelection = 0;
 
     // loop until valid option is input
@@ -137,7 +169,7 @@ int main()
     
     cout << fileName << " file:\n\n";
 
-    fileData.open("res/" + fileName);
+    fileData.open(path + fileName);
 
     // if file is unable to be opened, quit program
     if(!fileData.is_open())
@@ -154,7 +186,7 @@ int main()
     // watch for sentinel value or file read error
     while(nextVal != 9999 && !fileData.fail())
     {
-
+        // check if next value is negative
         if(nextVal < 0)
         {
             cout << BG_BLUE;
@@ -162,6 +194,7 @@ int main()
             invalidCount++;
         }
 
+        // clamp out of range value to max
         if(nextVal > MAX_RANGE)
         {
             cout << BG_RED;
