@@ -1,3 +1,25 @@
+//-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+// SlackT_pgm4.cpp
+//
+// Program: A program to display bar graphs for different input files.
+// Process: File is read in based upon user input. An output scaled to the
+// width of the console is displayed for every input until 9999 is read from
+// the input file. Color is provided if a value is negative or outside of the
+// maximum range for the graph to display.
+// Results: A colored bar graph with a labeled x and y axis. 
+//
+// Class: CS 2010
+// Section: 1005
+// Term: Fall 2024
+// Author: Teak Slack
+//
+// Reflection: This program wasn't too bad! The only functions I wrote were
+// to implement OS-specific functionality for the console width (I like to
+// develop on WSL). The main functionality of the program is contained all
+// within the main function. While the program isn't easily scalable, that
+// isn't the purpose of this program.
+//-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
 #include <iostream>
 #include <iomanip>
 #include <fstream>
@@ -18,11 +40,6 @@ const string BG_BLUE = "\033[44m";
 const string BG_RED = "\033[41m";
 const string RESET = "\033[0m";
 
-void setConsoleColor(string color)
-{
-    cout << color;
-}
-
 #ifdef _WIN32
 // using winapi to fetch console info
 // using hungarian notation to align with winapi
@@ -41,14 +58,6 @@ int getConsoleWidth()
     int width  = csbi.srWindow.Right - csbi.srWindow.Left + 1;
     return width;
 }
-
-// const int RESET = 7;
-
-// void setConsoleColor(int color)
-// {
-//     SetConsoleTextAttribute(hConsole, color);
-// }
-
 #elif __unix__
 int getConsoleWidth()
 {
@@ -148,14 +157,14 @@ int main()
 
         if(nextVal < 0)
         {
-            setConsoleColor(BG_BLUE);
+            cout << BG_BLUE;
             nextVal = abs(nextVal);
             invalidCount++;
         }
 
         if(nextVal > MAX_RANGE)
         {
-            setConsoleColor(BG_RED);
+            cout << BG_RED;
             nextVal = MAX_RANGE;
         }
 
@@ -165,7 +174,7 @@ int main()
         cout << setfill(' ') << setw(2) << right;
         cout << idx << " |";
         cout << setw(barWidth) << setfill('X');
-        setConsoleColor(RESET);
+        cout << RESET;
         cout << "\n";
 
         idx++;
