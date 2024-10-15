@@ -1,3 +1,8 @@
 .vscode
 **/*.o
 **/*.exe
+bin/**
+bin-int/**
+Makefile
+**.make
+.premake5.lua.swp
