@@ -6,3 +6,6 @@ bin-int/**
 Makefile
 **.make
 .premake5.lua.swp
+**.sln
+**.vcxproj
+.vs/**
