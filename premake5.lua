@@ -7,7 +7,9 @@ function setupProject(name, mainFile)
       kind "ConsoleApp"
       language "C++"
       cppdialect "C++17"
-      targetdir ("bin/%{cfg.buildcfg}" .. name)
+
+      targetdir ("bin/%{cfg.buildcfg}/")
+      objdir ("bin-int/")
 
       files { "src/**.h", "include/**.h", mainFile }
       includedirs { "include" }

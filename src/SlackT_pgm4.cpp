@@ -183,9 +183,41 @@ int main()
     int nextVal;
     fileData >> nextVal;
 
+    int min1 = nextVal, min2 = nextVal, min3 = nextVal;
+    int max1 = nextVal, max2 = nextVal, max3 = nextVal;
+
     // watch for sentinel value or file read error
     while(nextVal != 9999 && !fileData.fail())
     {
+        // check for min/max values
+        if(nextVal < min1)
+        {
+            min3 = min2;
+            min2 = min1;
+            min1 = nextVal;
+        } else if(nextVal < min2)
+        {
+            min3 = min2;
+            min2 = nextVal;
+        } else if(nextVal < min3)
+        {
+            min3 = nextVal;
+        }
+
+        if(nextVal > max1)
+        {
+            max3 = max2;
+            max2 = max1;
+            max1 = nextVal;
+        } else if(nextVal > max2)
+        {
+            max3 = min2;
+            max2 = nextVal;
+        } else if(nextVal > max3)
+        {
+            max3 = nextVal;
+        }
+        
         // check if next value is negative
         if(nextVal < 0)
         {
@@ -199,6 +231,7 @@ int main()
         {
             cout << BG_RED;
             nextVal = MAX_RANGE;
+            invalidCount++;
         }
 
         // calculate bar length and print
@@ -226,7 +259,23 @@ int main()
         yScale.append(next);
     }
 
-    cout << yScale << "\n";
+    cout << yScale << "\n\n";
+
+    cout << "SMALLEST\n";
+    cout << "========\n\n";
+    cout << "The smallest value: " << min1 << "\n";
+    cout << "The 2nd smallest value: " << min2 << "\n";
+    cout << "The 3rd smallest value: " << min3 << "\n\n";
+
+    cout << "LARGEST\n";
+    cout << "=======\n\n";
+    cout << "The largest value: " << max1 << "\n";
+    cout << "The 2nd largest value: " << max2 << "\n";
+    cout << "The 3rd largest value: " << max3 << "\n\n";
+
+    cout << "INVALID\n";
+    cout << "=======\n\n";
+    cout << "There are " << invalidCount << " invalid values in this data.\n";
 
     fileData.close();
     return EXIT_SUCCESS;
