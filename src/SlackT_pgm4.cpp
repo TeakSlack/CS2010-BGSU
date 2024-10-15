@@ -15,7 +15,7 @@
 //
 // Reflection: This program wasn't too bad! The only functions I wrote were
 // to implement OS-specific functionality for the console width (I like to
-// develop on WSL). The main functionality of the program is contained all
+// program on WSL). The main functionality of the program is contained all
 // within the main function. While the program isn't easily scalable, that
 // isn't the purpose of this program.
 //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
@@ -37,7 +37,7 @@
 using std::cout, std::cin, std::ifstream, std::abs, std::setw, std::left, std::right, std::setfill, std::string;
 
 #ifdef TEAK_LOCAL
-string path = "res/";
+string path = "/mnt/c/users/teaki/OneDrive/Documents/Dev/CS2010/res/";
 #else
 string path = "";
 #endif

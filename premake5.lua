@@ -13,7 +13,7 @@ function setupProject(name, mainFile)
       includedirs { "include" }
 
       filter "configurations:Debug"
-         defines { "DEBUG" }
+         defines { "DEBUG", "_DEBUG", "TEAK_LOCAL" }
          symbols "On"
 
       filter "configurations:Release"
