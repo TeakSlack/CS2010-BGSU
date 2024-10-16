@@ -142,19 +142,8 @@ int main()
         else if(nextVal > max3) max3 = nextVal;
         
         // Highlight and clamp invalid values
-        if(nextVal < 0)
-        {
-            cout << BG_BLUE;
-            nextVal = abs(nextVal);
-            invalidCount++;
-        }
-
-        if(nextVal > MAX_RANGE)
-        {
-            cout << BG_RED;
-            nextVal = MAX_RANGE;
-            invalidCount++;
-        }
+        if(nextVal < 0) nextVal = abs(nextVal), invalidCount++, cout << BG_BLUE;
+        if(nextVal > MAX_RANGE) nextVal = MAX_RANGE, invalidCount++, cout << BG_RED;
 
         // Calculate bar width and print bar with 'X'
         int barWidth = ((nextVal * (CONSOLE_WIDTH - 4)) / MAX_RANGE) + 1;
