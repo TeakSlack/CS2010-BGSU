@@ -56,59 +56,28 @@ HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 void setupConsole()
 {
     DWORD consoleMode;
-    if(!GetConsoleMode(hConsole, &consoleMode))
-    {
-        cout << "ERROR: Cannot get console mode!\n";
-        exit(EXIT_FAILURE);
-    }
-
-    consoleMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
-    if(!SetConsoleMode(hConsole, consoleMode))
-    {
-        cout << "ERROR: Could not set console mode!\n";
-        exit(EXIT_FAILURE);
-    }
+    if(!GetConsoleMode(hConsole, &consoleMode)) exit(EXIT_FAILURE);
+    if(!SetConsoleMode(hConsole, consoleMode | ENABLE_VIRTUAL_TERMINAL_PROCESSING)) exit(EXIT_FAILURE);
 }
 
 int getConsoleWidth()
 {
     CONSOLE_SCREEN_BUFFER_INFO csbi;
-
-    if(!GetConsoleScreenBufferInfo(hConsole, &csbi))
-    {
-        cout << "ERROR: Cannot fetch console screen buffer info.\n";
-        exit(EXIT_FAILURE);
-    }
-
-    int width  = csbi.srWindow.Right - csbi.srWindow.Left + 1;
-    return width;
+    if(!GetConsoleScreenBufferInfo(hConsole, &csbi)) exit(EXIT_FAILURE);
+    return csbi.srWindow.Right - csbi.srWindow.Left + 1;
 }
 #elif __unix__
 int getConsoleWidth()
 {
     struct winsize w;
-
-    if(ioctl(STDOUT_FILENO, TIOCGWINSZ, &w) == -1)
-    {
-        cout << "ERROR: Cannot get console size.\n";
-        exit(EXIT_FAILURE);
-    }
-
-    assert(w.ws_col != -1);
+    if(ioctl(STDOUT_FILENO, TIOCGWINSZ, &w) == -1) exit(EXIT_FAILURE);
     return w.ws_col;
 }
 
-void setupConsole()
-{
-
-}
+void setupConsole() {}
 #endif
 
-#ifdef _DEBUG
-const int MAX_SELECTION = 5;
-#else
 const int MAX_SELECTION = 4;
-#endif
 
 // FIXME: if console size is changed during runtime, output will not scale
 const int CONSOLE_WIDTH = getConsoleWidth();
@@ -119,18 +88,13 @@ int main()
     setupConsole();
 
     int fileSelection = 0;
+    string fileNames[] = {"mixed.txt", "valid.txt", "three.txt", "missing.txt"};
 
     // loop until valid option is input
     while (fileSelection < 1 || fileSelection > MAX_SELECTION)
     {
         cout << "Select file to process:\n";
-        cout << "1. mixed.txt\n";
-        cout << "2. valid.txt\n";
-        cout << "3. three.txt\n";
-        cout << "4. missing.txt\n";
-        #ifdef _DEBUG
-        cout << "5. debug.txt\n";
-        #endif
+        for(int i = 1; i <= MAX_SELECTION; i++) cout << i << ". " << fileNames[i - 1] << "\n";
         cout << "\n";
 
         cout << "Choice: ";
@@ -147,7 +111,7 @@ int main()
     // create ifstream & open respective file
     ifstream fileData;
 
-    cout << "Bar graph for data contained in ";
+    cout << "Bar graph for data contained in " << fileNames[fileSelection - 1] << " file.";
 
     string fileName;
 
@@ -162,12 +126,7 @@ int main()
         case 3:
             fileName = "three.txt";
             break;
-        case 5:
-            fileName = "debug.txt";
-            break;
     }
-    
-    cout << fileName << " file:\n\n";
 
     fileData.open(path + fileName);
 
@@ -190,33 +149,13 @@ int main()
     while(nextVal != 9999 && !fileData.fail())
     {
         // check for min/max values
-        if(nextVal < min1)
-        {
-            min3 = min2;
-            min2 = min1;
-            min1 = nextVal;
-        } else if(nextVal < min2)
-        {
-            min3 = min2;
-            min2 = nextVal;
-        } else if(nextVal < min3)
-        {
-            min3 = nextVal;
-        }
+        if(nextVal < min1) min3 = min2, min2 = min1, min1 = nextVal;
+        else if(nextVal < min2) min3 = min2, min2 = nextVal;
+        else if(nextVal < min3) min3 = nextVal;
 
-        if(nextVal > max1)
-        {
-            max3 = max2;
-            max2 = max1;
-            max1 = nextVal;
-        } else if(nextVal > max2)
-        {
-            max3 = min2;
-            max2 = nextVal;
-        } else if(nextVal > max3)
-        {
-            max3 = nextVal;
-        }
+        if(nextVal > max1) max3 = max2, max2 = max1, max1 = nextVal;
+        else if(nextVal > max2) max3 = min2, max2 = nextVal;
+        else if(nextVal > max3) max3 = nextVal;
         
         // check if next value is negative
         if(nextVal < 0)
@@ -238,44 +177,28 @@ int main()
         int barWidth = ((nextVal * (CONSOLE_WIDTH - 4)) / MAX_RANGE) + 1;
 
         cout << setfill(' ') << setw(2) << right;
-        cout << idx << " |";
-        cout << setw(barWidth) << setfill('X');
-        cout << RESET;
-        cout << "\n";
+        cout << idx << " |" << setw(barWidth + 1) << setfill('X') << RESET << "\n";
 
         idx++;
         fileData >> nextVal;
     }
 
-    for(int i = 0; i < CONSOLE_WIDTH; i++) cout << "-";
-    cout << "\n";
+    cout << string(getConsoleWidth(), '-') << "\n";
 
     // print y axis, scaled to console width
     string yScale = "    1";
     for(int i = 10; i < MAX_RANGE; i += 10)
     {
         int barWidth = ((i * (CONSOLE_WIDTH - 4)) / MAX_RANGE) + 1;
-        string next = string(barWidth - yScale.size() - 1, ' ') + std::to_string(i);
-        yScale.append(next);
+        yScale.append(string(barWidth - yScale.size(), ' ') + std::to_string(i));
     }
 
     cout << yScale << "\n\n";
 
-    cout << "SMALLEST\n";
-    cout << "========\n\n";
-    cout << "The smallest value: " << min1 << "\n";
-    cout << "The 2nd smallest value: " << min2 << "\n";
-    cout << "The 3rd smallest value: " << min3 << "\n\n";
-
-    cout << "LARGEST\n";
-    cout << "=======\n\n";
-    cout << "The largest value: " << max1 << "\n";
-    cout << "The 2nd largest value: " << max2 << "\n";
-    cout << "The 3rd largest value: " << max3 << "\n\n";
-
-    cout << "INVALID\n";
-    cout << "=======\n\n";
-    cout << "There are " << invalidCount << " invalid values in this data.\n";
+    cout << "SMALLEST\n" << "========\n\n";
+    cout << "The smallest value: " << min1 << "\nThe 2nd smallest value: " << min2 << "\nThe 3rd smallest value: " << min3 << "\n\n";
+    cout << "LARGEST\n" << "=======\n\n" << "The largest value: " << max1 << "\nThe 2nd largest value: " << max2 << "\nThe 3rd largest value: " << max3 << "\n\n";
+    cout << "INVALID\n" << "=======\n\n" << "There are " << invalidCount << " invalid values in this data.\n";
 
     fileData.close();
     return EXIT_SUCCESS;
