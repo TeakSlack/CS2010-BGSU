@@ -13,11 +13,12 @@
 // Term: Fall 2024
 // Author: Teak Slack
 //
-// Reflection: This program wasn't too bad! The only functions I wrote were
-// to implement OS-specific functionality for the console width (I like to
-// program on WSL). The main functionality of the program is contained all
-// within the main function. While the program isn't easily scalable, that
-// isn't the purpose of this program.
+// Reflection: This program wasn't too bad! TI had a lot of code while
+// writing this to make it cross platform. That code was ultimately cut to
+// make it cross-platform as I write and run on WSL but the program is
+// ultimately for Windows. A lot of code had to be refactored in order to
+// meet the line requirement and also have the dynamic console resizing 
+// functionality I desired.
 //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 #include <iostream>
 #include <iomanip>
@@ -29,7 +30,7 @@
 
 using std::cout, std::cin, std::ifstream, std::abs, std::setw, std::left, std::right, std::setfill, std::string;
 
-// ANSI escape codes for cross-platform background color
+// ANSI escape codes used for cross-platform background color
 const string BG_BLUE = "\033[44m", BG_RED = "\033[41m", RESET = "\033[0m";
 
 HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
