@@ -25,29 +25,14 @@
 #include <cmath>
 #include <cassert>
 #include <string>
-
-#ifdef _WIN32
 #include <windows.h>
-#elif __unix__
-#include <sys/ioctl.h>
-#include <unistd.h>
-#endif
 
 using std::cout, std::cin, std::ifstream, std::abs, std::setw, std::left, std::right, std::setfill, std::string;
 
 // ANSI escape codes for cross-platform background color
 const string BG_BLUE = "\033[44m", BG_RED = "\033[41m", RESET = "\033[0m";
 
-#ifdef _WIN32
 HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-
-// enable ANSI color codes on windows
-void setupConsole()
-{
-    DWORD consoleMode;
-    if(!GetConsoleMode(hConsole, &consoleMode)) exit(EXIT_FAILURE);
-    if(!SetConsoleMode(hConsole, consoleMode | ENABLE_VIRTUAL_TERMINAL_PROCESSING)) exit(EXIT_FAILURE);
-}
 
 // Get console width in Windows
 int getConsoleWidth()
@@ -56,17 +41,6 @@ int getConsoleWidth()
     if(!GetConsoleScreenBufferInfo(hConsole, &csbi)) exit(EXIT_FAILURE);
     return csbi.srWindow.Right - csbi.srWindow.Left + 1;
 }
-#elif __unix__
-// Get console width in unix systems
-int getConsoleWidth()
-{
-    struct winsize w;
-    if(ioctl(STDOUT_FILENO, TIOCGWINSZ, &w) == -1) exit(EXIT_FAILURE);
-    return w.ws_col;
-}
-
-void setupConsole() {}
-#endif
 
 const int MAX_SELECTION = 4;
 const int CONSOLE_WIDTH = getConsoleWidth();
@@ -74,8 +48,6 @@ const int MAX_RANGE = 112;
 
 int main()
 {
-    setupConsole();
-
     int fileSelection = 0;
     string fileNames[] = {"mixed.txt", "valid.txt", "three.txt", "missing.txt"};
 
@@ -107,8 +79,7 @@ int main()
             fileData.open(fileNames[fileSelection - 1]);
             break;
         case 4:
-            cout << "ERROR: File not found!\n";
-            exit(EXIT_FAILURE);
+            fileData.open(fileNames[fileSelection - 1]);
             break;            
     }
 
@@ -139,8 +110,19 @@ int main()
         else if(nextVal > max3) max3 = nextVal;
         
         // Highlight and clamp invalid values
-        if(nextVal < 0) nextVal = abs(nextVal), invalidCount++, cout << BG_BLUE;
-        if(nextVal > MAX_RANGE) nextVal = MAX_RANGE, invalidCount++, cout << BG_RED;
+        if(nextVal < 0)
+        {
+            nextVal = abs(nextVal);
+            invalidCount++;
+            cout << BG_BLUE;
+        }
+        
+        if(nextVal > MAX_RANGE)
+        {
+            nextVal = MAX_RANGE;
+            invalidCount++;
+            cout << BG_RED;
+        }
 
         // Calculate bar width and print bar with 'X'
         int barWidth = ((nextVal * (CONSOLE_WIDTH - 4)) / MAX_RANGE) + 1;
