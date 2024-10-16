@@ -21,6 +21,9 @@ function setupProject(name, mainFile)
       filter "configurations:Release"
          defines { "NDEBUG" }
          optimize "On"
+
+      filter "action:gmake"
+         buildoptions {"-Wall", "-Wextra", "-Werror", "-std=c++17"}
 end
 
 setupProject("pgm1", "src/SlackT_pgm1.cpp")

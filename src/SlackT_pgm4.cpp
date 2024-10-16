@@ -67,6 +67,7 @@ int main()
     // Open selected file
     ifstream fileData;
 
+    // This could be one line if a switch statement wasn't required!
     switch (fileSelection)
     {
         case 1:
@@ -82,7 +83,6 @@ int main()
             fileData.open(fileNames[fileSelection - 1]);
             break;            
     }
-
 
     // If file is unable to be opened, quit program
     if(!fileData.is_open())
