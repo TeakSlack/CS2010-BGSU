@@ -36,23 +36,13 @@
 
 using std::cout, std::cin, std::ifstream, std::abs, std::setw, std::left, std::right, std::setfill, std::string;
 
-#ifdef TEAK_LOCAL
-string path = "/mnt/c/users/teaki/OneDrive/Documents/Dev/CS2010/res/";
-#else
-string path = "";
-#endif
-
-// using ansi escape codes for cross-platform compatibility
-const string BG_BLUE = "\033[44m";
-const string BG_RED = "\033[41m";
-const string RESET = "\033[0m";
+// ANSI escape codes for cross-platform background color
+const string BG_BLUE = "\033[44m", BG_RED = "\033[41m", RESET = "\033[0m";
 
 #ifdef _WIN32
-// using winapi to fetch console info
-// using hungarian notation to align with winapi
 HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 
-// enable ansi color codes on windows
+// enable ANSI color codes on windows
 void setupConsole()
 {
     DWORD consoleMode;
@@ -60,6 +50,7 @@ void setupConsole()
     if(!SetConsoleMode(hConsole, consoleMode | ENABLE_VIRTUAL_TERMINAL_PROCESSING)) exit(EXIT_FAILURE);
 }
 
+// Get console width in Windows
 int getConsoleWidth()
 {
     CONSOLE_SCREEN_BUFFER_INFO csbi;
@@ -67,6 +58,7 @@ int getConsoleWidth()
     return csbi.srWindow.Right - csbi.srWindow.Left + 1;
 }
 #elif __unix__
+// Get console width in unix systems
 int getConsoleWidth()
 {
     struct winsize w;
@@ -78,8 +70,6 @@ void setupConsole() {}
 #endif
 
 const int MAX_SELECTION = 4;
-
-// FIXME: if console size is changed during runtime, output will not scale
 const int CONSOLE_WIDTH = getConsoleWidth();
 const int MAX_RANGE = 112;
 
@@ -90,7 +80,7 @@ int main()
     int fileSelection = 0;
     string fileNames[] = {"mixed.txt", "valid.txt", "three.txt", "missing.txt"};
 
-    // loop until valid option is input
+    // Loop until valid file selection
     while (fileSelection < 1 || fileSelection > MAX_SELECTION)
     {
         cout << "Select file to process:\n";
@@ -101,18 +91,10 @@ int main()
         cin >> fileSelection;
     }
 
-    // handle invalid input
-    if (fileSelection == 4)
-    {
-        cout << "ERROR: File not found!\n";
-        exit(EXIT_FAILURE);
-    }
-
-    // create ifstream & open respective file
-    ifstream fileData;
-
     cout << "Bar graph for data contained in " << fileNames[fileSelection - 1] << " file.";
 
+    // Open selected file
+    ifstream fileData;
     string fileName;
 
     switch (fileSelection)
@@ -126,29 +108,31 @@ int main()
         case 3:
             fileName = "three.txt";
             break;
+        case 4:
+            cout << "ERROR: File not found!\n";
+            exit(EXIT_FAILURE);
+            break;            
     }
 
-    fileData.open(path + fileName);
+    fileData.open(fileName);
 
-    // if file is unable to be opened, quit program
+    // If file is unable to be opened, quit program
     if(!fileData.is_open())
     {
         cout << "ERROR: Couldn't open file!\n";
         exit(EXIT_FAILURE);
     }
 
-    int invalidCount = 0;
-    int idx = 1;
-    int nextVal;
+    int invalidCount = 0, idx = 1, nextVal;
     fileData >> nextVal;
 
     int min1 = nextVal, min2 = nextVal, min3 = nextVal;
     int max1 = nextVal, max2 = nextVal, max3 = nextVal;
 
-    // watch for sentinel value or file read error
+    // Process values from file until sentinel value (9999) or error 
     while(nextVal != 9999 && !fileData.fail())
     {
-        // check for min/max values
+        // Update min/max values
         if(nextVal < min1) min3 = min2, min2 = min1, min1 = nextVal;
         else if(nextVal < min2) min3 = min2, min2 = nextVal;
         else if(nextVal < min3) min3 = nextVal;
@@ -157,7 +141,7 @@ int main()
         else if(nextVal > max2) max3 = min2, max2 = nextVal;
         else if(nextVal > max3) max3 = nextVal;
         
-        // check if next value is negative
+        // Highlight and clamp invalid values
         if(nextVal < 0)
         {
             cout << BG_BLUE;
@@ -165,7 +149,6 @@ int main()
             invalidCount++;
         }
 
-        // clamp out of range value to max
         if(nextVal > MAX_RANGE)
         {
             cout << BG_RED;
@@ -173,7 +156,7 @@ int main()
             invalidCount++;
         }
 
-        // calculate bar length and print
+        // Calculate bar width and print bar with 'X'
         int barWidth = ((nextVal * (CONSOLE_WIDTH - 4)) / MAX_RANGE) + 1;
 
         cout << setfill(' ') << setw(2) << right;
@@ -185,7 +168,7 @@ int main()
 
     cout << string(getConsoleWidth(), '-') << "\n";
 
-    // print y axis, scaled to console width
+    // Print y-axis scale line for graph
     string yScale = "    1";
     for(int i = 10; i < MAX_RANGE; i += 10)
     {
@@ -195,11 +178,13 @@ int main()
 
     cout << yScale << "\n\n";
 
+    // Output min, max, and count of invalid values
     cout << "SMALLEST\n" << "========\n\n";
     cout << "The smallest value: " << min1 << "\nThe 2nd smallest value: " << min2 << "\nThe 3rd smallest value: " << min3 << "\n\n";
     cout << "LARGEST\n" << "=======\n\n" << "The largest value: " << max1 << "\nThe 2nd largest value: " << max2 << "\nThe 3rd largest value: " << max3 << "\n\n";
     cout << "INVALID\n" << "=======\n\n" << "There are " << invalidCount << " invalid values in this data.\n";
 
+    // Close file and return
     fileData.close();
     return EXIT_SUCCESS;
 }
