@@ -19,7 +19,6 @@
 // within the main function. While the program isn't easily scalable, that
 // isn't the purpose of this program.
 //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-
 #include <iostream>
 #include <iomanip>
 #include <fstream>
@@ -91,22 +90,21 @@ int main()
         cin >> fileSelection;
     }
 
-    cout << "Bar graph for data contained in " << fileNames[fileSelection - 1] << " file.";
+    cout << "Bar graph for data contained in " << fileNames[fileSelection - 1] << " file.\n\n";
 
     // Open selected file
     ifstream fileData;
-    string fileName;
 
     switch (fileSelection)
     {
         case 1:
-            fileName = "mixed.txt";
+            fileData.open(fileNames[fileSelection - 1]);
             break;
         case 2:
-            fileName = "valid.txt";
+            fileData.open(fileNames[fileSelection - 1]);
             break;
         case 3:
-            fileName = "three.txt";
+            fileData.open(fileNames[fileSelection - 1]);
             break;
         case 4:
             cout << "ERROR: File not found!\n";
@@ -114,7 +112,6 @@ int main()
             break;            
     }
 
-    fileData.open(fileName);
 
     // If file is unable to be opened, quit program
     if(!fileData.is_open())
