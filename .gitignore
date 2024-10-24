@@ -8,5 +8,5 @@ Makefile
 .premake5.lua.swp
 **.sln
 **.vcxproj
-.vs/**
+.vs
 **.vcxproj.user

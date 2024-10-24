@@ -18,7 +18,9 @@
 // make it cross-platform as I write and run on WSL but the program is
 // ultimately for Windows. A lot of code had to be refactored in order to
 // meet the line requirement and also have the dynamic console resizing 
-// functionality I desired.
+// functionality I desired. I don't like that we have to use a switch
+// statement for something which could have been condensed to one line in my
+// code.
 //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 #include <iostream>
 #include <iomanip>
@@ -46,6 +48,9 @@ int getConsoleWidth()
 const int MAX_SELECTION = 4;
 const int CONSOLE_WIDTH = getConsoleWidth();
 const int MAX_RANGE = 112;
+const int SENTINEL = 9999;
+const int BAR_OFFSET = 4;
+const int AXIS_SCALE = 10;
 
 int main()
 {
@@ -69,6 +74,7 @@ int main()
     ifstream fileData;
 
     // This could be one line if a switch statement wasn't required!
+    // fileData.open(fileNames[fileSelection - 1]);
     switch (fileSelection)
     {
         case 1:
@@ -99,7 +105,7 @@ int main()
     int max1 = nextVal, max2 = nextVal, max3 = nextVal;
 
     // Process values from file until sentinel value (9999) or error 
-    while(nextVal != 9999 && !fileData.fail())
+    while(nextVal != SENTINEL && !fileData.fail())
     {
         // Update min/max values
         if(nextVal < min1) min3 = min2, min2 = min1, min1 = nextVal;
@@ -126,7 +132,7 @@ int main()
         }
 
         // Calculate bar width and print bar with 'X'
-        int barWidth = ((nextVal * (CONSOLE_WIDTH - 4)) / MAX_RANGE) + 1;
+        int barWidth = ((nextVal * (CONSOLE_WIDTH - BAR_OFFSET)) / MAX_RANGE) + 1;
 
         cout << setfill(' ') << setw(2) << right;
         cout << idx << " |" << setw(barWidth + 1) << setfill('X') << RESET << "\n";
@@ -137,11 +143,11 @@ int main()
 
     cout << string(getConsoleWidth(), '-') << "\n";
 
-    // Print y-axis scale line for graph
+    // Print y-axis scale line for graph every 10 values
     string yScale = "    1";
-    for(int i = 10; i < MAX_RANGE; i += 10)
+    for(int i = AXIS_SCALE; i < MAX_RANGE; i += AXIS_SCALE)
     {
-        int barWidth = ((i * (CONSOLE_WIDTH - 4)) / MAX_RANGE) + 1;
+        int barWidth = ((i * (CONSOLE_WIDTH - BAR_OFFSET)) / MAX_RANGE) + 1;
         yScale.append(string(barWidth - yScale.size(), ' ') + std::to_string(i));
     }
 
